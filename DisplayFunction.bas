@@ -55,7 +55,6 @@ Err_Handler:
 End Function
 
 
-
 Function CreatePKIndexes(strTableName As String, strID As String)
 Dim dbs As DAO.Database
 Dim tdf As DAO.TableDef
@@ -188,6 +187,13 @@ Else
 End If
 End Function
 
+Function checkFieldCurrency(rs As DAO.Recordset, fieldName As String) As String
+If IsNull(rs.Fields(fieldName)) = False Then
+     checkFieldCurrency = rs.Fields(fieldName)
+Else
+     checkFieldCurrency = "0"
+End If
+End Function
 'used in frmCurrency page
 Function YahooCurrencyConverter(ByVal strFromCurrency, ByVal strToCurrency, Optional ByVal strResultType = "Value") As Double
 On Error GoTo ErrorHandler
@@ -205,7 +211,7 @@ With objXMLHttp
     .Open "GET", strURL, False
     .setRequestHeader "Content-Type", "application/x-www-form-URLEncoded"
     .Send
-    strRes = .ResponseText
+    strRes = .responseText
 End With
  
 'Parse response
@@ -317,6 +323,99 @@ End Function
 
 
 
+'display psi
+Function getPSIFromNEA() As String
+
+'On Error GoTo ErrorHandler
+'source code from http://itpscan.info/blog/excel/VBA-XML-01.php
+    Dim xmlDoc As MSXML2.DOMDocument
+    Dim xEmpDetails As MSXML2.IXMLDOMNode
+    Dim xParent As MSXML2.IXMLDOMNode
+    Dim xChild As MSXML2.IXMLDOMNode
+    Dim info As String
+    Dim time As String
+    Set xmlDoc = New MSXML2.DOMDocument
+    xmlDoc.async = False
+    xmlDoc.validateOnParse = False
+    ' use XML string to create a DOM, on error show error message
+    If Not xmlDoc.Load("http://www.haze.gov.sg/data/rss/nea_psi_3hr.xml") Then
+        Debug.Print xmlDoc.parseError.ErrorCode & xmlDoc.parseError.reason
+    Else
+        Set xEmpDetails = xmlDoc.DocumentElement
+        Set xParent = xEmpDetails.FirstChild
+               
+        Dim xmlNodeList As IXMLDOMNodeList
+        
+        Set xmlNodeList = xmlDoc.SelectNodes("//item")
+        
+        Dim count As Integer
+        count = 0
+        For Each xParent In xmlNodeList
+        
+            For Each xChild In xParent.ChildNodes
+                'If xChild.nodeName = "pubDate" Then
+                    'time = Right(xChild.text, 3)
+                If xChild.nodeName = "psi" Then
+                     info = Mid(xChild.text, 4, Len(xChild.text))
+                End If
+            Next xChild
+            count = count + 1
+            If count = 1 Then Exit For
+        Next xParent
+    
+
+    End If
+    getPSIFromNEA = info
+'ErrorHandler:
+ '   MsgBox "There is no internet connection.", vbInformation, "Internet Connection"
+
+End Function
 
 
+'display heavyRain
+Function getHeavyRainFromNEA() As String
 
+'On Error GoTo ErrorHandler
+'source code from http://itpscan.info/blog/excel/VBA-XML-01.php
+    Dim xmlDoc As MSXML2.DOMDocument
+    Dim xEmpDetails As MSXML2.IXMLDOMNode
+    Dim xParent As MSXML2.IXMLDOMNode
+    Dim xChild As MSXML2.IXMLDOMNode
+    Dim Col, Row As Integer
+    
+    Dim info As String
+    info = ""
+    Set xmlDoc = New MSXML2.DOMDocument
+    xmlDoc.async = False
+    xmlDoc.validateOnParse = False
+    ' use XML string to create a DOM, on error show error message
+    If Not xmlDoc.Load("http://wip.weather.gov.sg/wip/pp/rndops/web/rss/rssHeavyRain_new.xml") Then
+        Debug.Print xmlDoc.parseError.ErrorCode & xmlDoc.parseError.reason
+    Else
+        Set xEmpDetails = xmlDoc.DocumentElement
+        Set xParent = xEmpDetails.FirstChild
+               
+        Dim xmlNodeList As IXMLDOMNodeList
+        
+        Set xmlNodeList = xmlDoc.SelectNodes("//entry")
+        
+        Dim count As Integer
+        count = 0
+        For Each xParent In xmlNodeList
+        
+            For Each xChild In xParent.ChildNodes
+                If xChild.nodeName = "summary" Then
+                    info = xChild.text
+                End If
+            Next xChild
+            count = count + 1
+            If count = 1 Then Exit For
+        Next xParent
+    
+
+    End If
+    getHeavyRainFromNEA = info
+'ErrorHandler:
+'    MsgBox "There is no internet connection.", vbInformation, "Internet Connection"
+
+End Function

@@ -83,16 +83,10 @@ Declare Function CopyEnhMetaFile Lib "gdi32" Alias "CopyEnhMetaFileA" (ByVal hem
 'Create our own copy of the bitmap, so it doesn't get wiped out bysubsequent clipboard updates.
 Declare Function CopyImage Lib "user32" (ByVal handle As Long, ByVal un1 As Long, ByVal n1 As Long, ByVal n2 As Long, ByVal un2 As Long) As Long
  
-
-
- Type picImage
- Height As Long
- width As Long
-
+Type picImage
+    Height As Long
+    width As Long
 End Type
-
-
-
 
 
 Sub OffCamera()

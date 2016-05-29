@@ -1,5 +1,6 @@
 Attribute VB_Name = "SystemTool"
 Option Compare Database
+Option Explicit
 
 Private Declare Function GetComputerName Lib "kernel32" _
         Alias "GetComputerNameA" ( _
@@ -23,7 +24,8 @@ Public Function CompName() As String
   CompName = ComputerName
 End Function
 
-Sub Main()
+Public Function DisplayComputerDrive() As String
+    Dim data$
 'Website to refer : https://awrcorp.com/download/faq/english/scripts/basic_file_opperation.aspx
     Dim fso As Scripting.FileSystemObject
     Dim dr As Scripting.Drive
@@ -35,13 +37,16 @@ Sub Main()
 
     'Debug.Clear
     For Each dr In fso.Drives
-        Debug.Print dr.DriveLetter & ": File System " & dr.FileSystem
-        Debug.Print dr.DriveLetter & ": Free Space " & CInt(dr.AvailableSpace / 10 ^ 9) & " GB, " & CInt(dr.AvailableSpace / dr.TotalSize * 100) & "%"
-        Debug.Print dr.DriveLetter & ": Used Space " & CInt((dr.TotalSize - dr.AvailableSpace) / 10 ^ 9) & " GB, " & CInt((dr.TotalSize - dr.AvailableSpace) / dr.TotalSize * 100) & "%"
-        Debug.Print dr.DriveLetter & ": Total Size " & CInt((dr.TotalSize / 10 ^ 9)) & " GB"
-        
+        data$ = data$ & dr.DriveLetter & ": File System " & dr.FileSystem & " , " & _
+        "Free Space " & CInt(dr.AvailableSpace / 10 ^ 9) & " GB, " & CInt(dr.AvailableSpace / dr.TotalSize * 100) & "%" & " , " & _
+        "Used Space " & CInt((dr.TotalSize - dr.AvailableSpace) / 10 ^ 9) & " GB, " & CInt((dr.TotalSize - dr.AvailableSpace) / dr.TotalSize * 100) & "%" & " , " & _
+        "Total Size " & CInt((dr.TotalSize / 10 ^ 9)) & " GB"
+       ' data$ = data$ & dr.DriveLetter & ": Free Space " & CInt(dr.AvailableSpace / 10 ^ 9) & " GB, " & CInt(dr.AvailableSpace / dr.TotalSize * 100) & "%" & vbNewLine
+       ' data$ = data$ & dr.DriveLetter & ": Used Space " & CInt((dr.TotalSize - dr.AvailableSpace) / 10 ^ 9) & " GB, " & CInt((dr.TotalSize - dr.AvailableSpace) / dr.TotalSize * 100) & "%" & vbNewLine
+       ' data$ = data$ & dr.DriveLetter & ": Total Size " & CInt((dr.TotalSize / 10 ^ 9)) & " GB" & vbNewLine
     Next dr
-End Sub
+    DisplayComputerDrive = data$
+End Function
 
 Function GetIPAddress()
     Const strComputer As String = "."   ' Computer name. Dot means local computer
